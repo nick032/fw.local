@@ -1,8 +1,12 @@
 <?php
 
 namespace app\controllers;
-class Posts {
-	public function indexAction(){
+use vendor\core\base\Controller;
+
+class Posts extends Controller {
+
+    public function indexAction(){
+        debug($this->route);
 		echo "Posts::index";
 	}
 

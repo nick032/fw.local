@@ -1,18 +1,8 @@
 <?php
-<<<<<<< HEAD
+
 error_reporting(-1);
 use vendor\core\Router;
-=======
 
-
-// echo "Процесс начался....</br>";
-// for($i = 0; $i < 5000; $i++) {
-
-// 	$a = file_get_contents('http://mjzhsyloonvxi33emf4s44tv.cmle.ru/2016090940808/incidents/V-Bryanske-rassmotryat-delo-legendarnogo-eks-chinovnika-Poleschenko.html', NULL, NULL, 100, 20);
-// }
-// echo "Done!";
-// exit();
->>>>>>> origin/master
 $query = $_SERVER['QUERY_STRING'];
 
 define('WWW', __DIR__);
@@ -33,7 +23,8 @@ spl_autoload_register(function($class){
 	}
 });
 
-Router::add('^pages/?(?P<action>[a-z-]+)?$', ['controller' => 'Posts']);
+Router::add('^page/(?P<action>[a-z-]+)/(?P<alias>[a-z-]+)$', ['controller' => 'Page']);
+Router::add('^page/(?P<alias>[a-z-]+)$', ['controller' => 'Page', 'action' => 'view']);
 
 // Defaults routes
 
