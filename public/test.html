@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+	<title>FadeUtIn</title>
+	<style>
+		.im-hidden {
+			display: none;
+		}
+	</style>
+</head>
+<body>
+	
+
+	<div class="wrap">
+		<div class="block">
+			<button class="calc">Расчитать</button>
+			<span class="im-hidden">
+				<img src="loader.gif" alt="">
+			</span>
+			<span class="total"></span>
+		</div>
+
+	</div>
+
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+<script>
+$(document).ready(function(){
+	$('.calc').click(function(e){
+		e.preventDefault();
+		var $this = $(this),
+			parent = $this.parent(),
+			loader = $this.next(),
+			total = loader.next();
+
+		$.ajax({
+			type: 'post',
+			url: 'handler.php',
+			data: {
+				param: '1'
+			},
+			beforeSend: function(){
+				$this.fadeOut(30, function(){
+					loader.fadeOut(3);
+				});
+			},
+			success: function(res){
+				loader.fadeIn(3000, function(){
+					//$this.fadeIn(300);
+					total.html(res);
+				})
+			},
+			error: function(){
+				alert('Error!!!')
+			}
+		});
+	});
+});
+	
+</script>
+</body>
+</html>
