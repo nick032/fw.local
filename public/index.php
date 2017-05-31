@@ -1,31 +1,15 @@
 <?php
+require __DIR__."/../vendor/autoload.php";
 
-error_reporting(-1);
-use vendor\core\Router;
+\Core\Router::add('^page/?(?P<action>[a-z-]+)?$', ['controller'=> 'Posts']);
 
-$query = $_SERVER['QUERY_STRING'];
+// defaults routes
+\Core\Router::add('^$', ['controller'=> 'Main', 'action' => 'index']);
+\Core\Router::add('^(?P<controller>[a-z-]+)/?(?P<action>[a-z-]+)?$');
 
-define('WWW', __DIR__);
-define('CORE', dirname(__DIR__) . '/vendor/core');
-define('APP', dirname(__DIR__) . '/app');
-define('ROOT', dirname(__DIR__));
-define('LAYOUT', 'default');
-
-require_once '../vendor/libs/functions.php';
-
-spl_autoload_register(function($class){
-	$file = ROOT . '/' . str_replace('\\', '/', $class) . '.php';
-	if(is_file($file)) {
-		require_once($file);
-	}
-});
-
-Router::add('^page/(?P<action>[a-z-]+)/(?P<alias>[a-z-]+)$', ['controller' => 'Page']);
-Router::add('^page/(?P<alias>[a-z-]+)$', ['controller' => 'Page', 'action' => 'view']);
-
-// Defaults routes
-
-Router::add('^$', ['controller' => 'Main', 'action' => 'index']);
-Router::add('^(?P<controller>[a-z-]+)/?(?P<action>[a-z-]+)?$');
-
-Router::dispatch($query);
+$query = trim($_SERVER['REQUEST_URI'], '/');
+try{
+    \Core\Router::dispatch($query);
+}catch (Exception $e) {
+    echo $e->getMessage();
+}

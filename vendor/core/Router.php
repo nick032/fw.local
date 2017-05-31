@@ -1,20 +1,32 @@
 <?php
-namespace vendor\core;
+
+namespace Core;
+
 class Router
 {
-    protected static $routes = [];
-    protected static $route = [];
+    protected static $routes;
+    protected static $route;
 
-    public static function add($regexp, $route = [])
+    /**
+     * @param $regex
+     * @param array $route
+     */
+    public static function add($regex, $route = [])
     {
-        self::$routes[$regexp] = $route;
+        self::$routes[$regex] = $route;
     }
 
+    /**
+     * @return mixed
+     */
     public static function getRoutes()
     {
         return self::$routes;
     }
 
+    /**
+     * @return mixed
+     */
     public static function getRoute()
     {
         return self::$route;
@@ -24,68 +36,66 @@ class Router
     {
         foreach (self::$routes as $pattern => $route) {
             if (preg_match("#$pattern#i", $url, $matches)) {
-                foreach($matches as $k => $v){
-                    if(is_string($k)) {
-                        $route[$k] = $v;
+                foreach ($matches as $key => $value) {
+                    if (is_string($key)) {
+                        $route[$key] = $value;
                     }
                 }
-                if(!isset($route['action'])) {
+                if (!isset($route['action'])) {
                     $route['action'] = 'index';
                 }
-                $route['controller'] = self::upperCamelCase($route['controller']);
                 self::$route = $route;
                 return true;
             }
         }
         return false;
     }
+
     /**
-    * перенаправляет URL по корректному маршруту
-    * @param string $url входящий URL
-    * @return void
-    */
-    public static function dispatch($url) {
-        $url = self::removeQueryString($url);
-        if(self::matchRoute($url)){
-            $controller = 'app\controllers\\' .  self::$route['controller'];
-            if(class_exists($controller)){
-                $cObj = new $controller(self::$route);
-                $action = self::lowerCamelCase(self::$route['action']).'Action';
-                if(method_exists($cObj, $action)){
-                    $cObj->$action();
-                    $cObj->getView();
-                }else {
-                    echo "Метод <b>$controller::$action</b> не найден";
+     * Перенаправляет  запрос по нужному маршруту
+     * @param $url
+     * @throws \Exception
+     * @return void
+     */
+    public static function dispatch($url)
+    {
+        if (self::matchRoute($url)) {
+            $controllerName = 'App\\Controllers\\' . self::upperCamelCase(self::$route['controller']) . 'Controller';
+            if (class_exists($controllerName)) {
+                $controller = new $controllerName();
+                $action = self::lowerCamelCase(self::$route['action']) . 'Action';
+                if (method_exists($controller, $action)) {
+                    $controller->$action();
+                } else {
+                    throw new \Exception("<br><strong>Метод $controllerName::$action не найден</strong>");
                 }
-            }else {
-                echo "Контроллер $controller не найлен";
+            } else {
+                throw new \Exception("<strong>Контроллер $controllerName не найден</strong>");
             }
-        }else{
+        } else {
             http_response_code(404);
             include '404.html';
         }
     }
 
-    protected static function upperCamelCase($name) {
-        return  str_replace(' ', '', ucwords(str_replace('-', ' ', $name)));
-    }
-    /*
-     * преобразует имена к виду camelCase
-     * @param string $name строка для преобразования
+    /**
+     * @param $name
      * @return string
-     * */
-    protected static function lowerCamelCase($name) {
-        return  lcfirst(self::upperCamelCase($name));
+     */
+    protected static function upperCamelCase($name)
+    {
+        $name = str_replace('-', ' ', $name);
+        $name = ucwords($name);
+        $name = str_replace(' ', '', $name);
+        return $name;
     }
 
-    protected static function removeQueryString($url) {
-        if($url) {
-            $params = explode('&', $url, 2);
-            if(false === strpos($params[0], '=')) {
-                return rtrim($params[0], '/');
-            }else{
-                return '';
-            }
-        }
+    /**
+     * @param $name
+     * @return string
+     */
+    protected static function lowerCamelCase($name)
+    {
+        return lcfirst(self::upperCamelCase($name));
     }
 }
